@@ -1,0 +1,1 @@
+./parallel_commands "./smartrun_mod.sh CounterServerSpark 0" "./smartrun_mod.sh CounterServerSpark 1" "./smartrun_mod.sh CounterServerSpark 2" "./smartrun_mod.sh CounterServerSpark 3"

@@ -1,0 +1,5 @@
+graphql-bench
+myreport.json
+myreportsmall.txt
+node_modules/
+yarn.lock

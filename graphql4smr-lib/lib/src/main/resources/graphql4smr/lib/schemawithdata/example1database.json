@@ -1,0 +1,38 @@
+{
+  "config":{
+    "default_graphql_queries":true
+  },
+  "table_schema":[
+    {
+      "table":"author",
+      "table_type":"Author",
+      "fields":[
+        {
+          "field_type":"text",
+          "field_name":"id"
+        },
+        {
+          "field_type":"text",
+          "field_name":"name"
+        }
+      ]
+    }
+  ],
+  "table_content":[
+    {
+      "table":"author",
+      "table_values":[
+        {"id":"123","name": "peter"},
+        {"id":"100","name": "hanz"}
+      ]
+    }
+  ]
+}
+
+
+
+
+
+
+
+

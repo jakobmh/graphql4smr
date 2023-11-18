@@ -1,0 +1,56 @@
+{
+  "config":{
+    "default_graphql_queries":true
+  },
+  "table_schema":[
+    {
+      "table":"article",
+      "table_type":"Article",
+      "fields":[
+        {
+          "field_type":"text",
+          "field_name":"id",
+          "primary_key":true
+        },
+        {
+          "field_type":"foreign_key",
+          "field_name":"author_id",
+          "references_table":"author",
+          "references_field":"id"
+        }
+      ]
+    },{
+      "table":"author",
+      "table_type":"Author",
+      "fields":[
+        {
+          "field_type":"text",
+          "field_name":"id"
+        }
+      ]
+    }
+  ],
+  "table_content":[
+    {
+      "table":"article",
+      "table_values":[
+        {"id":"1", "author_id": "1"},
+        {"id":"2", "author_id": "3"}
+      ]
+    },
+    {
+      "table":"author",
+      "table_values":[
+        {"id":"123"}
+      ]
+    }
+  ]
+}
+
+
+
+
+
+
+
+

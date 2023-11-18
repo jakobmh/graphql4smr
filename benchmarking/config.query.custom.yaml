@@ -1,0 +1,19 @@
+url: http://localhost:5555/graphql
+queries:
+  - name: counterexample
+    tools: [autocannon]
+    execution_strategy: REQUESTS_PER_SECOND
+    rps: 500
+    duration: 5s
+    query: |
+      {counter}
+  - name: counterexamplemutation
+    tools: [autocannon]
+    execution_strategy: REQUESTS_PER_SECOND
+    rps: 500
+    duration: 5s
+    query: |
+      mutation {increment(zahl:1)}
+
+
+
