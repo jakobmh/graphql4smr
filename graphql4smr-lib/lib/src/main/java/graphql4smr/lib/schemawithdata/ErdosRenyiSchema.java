@@ -8,7 +8,7 @@ import java.util.*;
 
 public class ErdosRenyiSchema {
 
-
+    private static long seed = 46l;
 
     public static InternalFormat getSchema(boolean cyclic) {
         double prob = 0.5;
@@ -19,6 +19,10 @@ public class ErdosRenyiSchema {
         return getSchema(b,v,n,null);
     }
     public static InternalFormat getSchema(boolean cyclic, double prob, int N, LockBuilder lockBuilder){
+
+        Random generator = new Random(seed);
+
+
         int[][] graph = new int[N][N];
         InternalFormat internalFormat;
         if(lockBuilder!=null) {
@@ -69,7 +73,7 @@ public class ErdosRenyiSchema {
         for(int i=0; i < N; i++){
             for(int j= cyclic?0:(i+1); j< N; j++){
                 //if(j==i)continue; selfreferencing
-                double rand = Math.random();
+                double rand = generator.nextDouble();
                 if(rand <= prob){
                     graph[i][j]=1;
                     FieldSchema fieldSchema = new FieldSchema();
@@ -129,7 +133,7 @@ public class ErdosRenyiSchema {
                     if(field.field_name.equals("id")){
                         map.put(field.field_name,item); //TODO id ref
                     }else{
-                        map.put(field.field_name, idmaplist.get(field.field_name).get((int) (Math.random()*idmaplist.get(field.field_name).size()))); //TODO id ref
+                        map.put(field.field_name, idmaplist.get(field.field_name).get((int) (generator.nextDouble()*idmaplist.get(field.field_name).size()))); //TODO id ref
                     }
                 }
             }

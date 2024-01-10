@@ -25,6 +25,14 @@ public class PlotterGui {
     }
 
     public static BufferedImage createplot1(){
+        return createplot(false);
+    }
+
+    public static BufferedImage createplot2(){
+        return createplot(true);
+    }
+
+    public static BufferedImage createplot(Boolean disableLocks){
         File tempFileoutput = null;
         try {
             tempFileoutput = File.createTempFile("prefix-", "-suffix");
@@ -33,19 +41,19 @@ public class PlotterGui {
         }
         tempFileoutput.deleteOnExit();
 
-        String warmup = Performancetest.test();
+        String warmup = Performancetest.test(disableLocks);
 
-        String data3 = Performancetest.testmultithreadeduds();
-        String data = Performancetest.test();
-        String data2 = Performancetest.testmultithreaded();
+        String data3 = Performancetest.testmultithreadeduds(disableLocks);
+        String data = Performancetest.test(disableLocks);
+        String data2 = Performancetest.testmultithreaded(disableLocks);
 
 
-        String title = "Request depth, with warmup";
+        String title = "Anfrage Tiefe";
         try {
             GnuplotExample.streampicture(tempFileoutput,new LinkedList<Pair<String,String>>(){{
-                add(new Pair(data,"single Theaded"));
-                add(new Pair(data2,"multi Theaded"));
-                add(new Pair(data3,"uds multi Theaded"));
+                add(new Pair(data,"Single-Threaded"));
+                add(new Pair(data2,"Multi-Threaded"));
+                add(new Pair(data3,"UDS Multi-Threaded"));
 
 
             }},title);
@@ -59,6 +67,8 @@ public class PlotterGui {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("pathtopic: " + tempFileoutput.getPath());
+
         return img;
     }
 

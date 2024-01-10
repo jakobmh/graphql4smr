@@ -1,5 +1,6 @@
 package graphql4smr.lib.schemawithdata;
 
+import graphql4smr.lib.util.FakeReentrantLock;
 import graphql4smr.lib.util.LockBuilder;
 import org.checkerframework.checker.units.qual.C;
 
@@ -18,6 +19,14 @@ public class InternalFormat {
 
     transient
     private Lock globallock = new ReentrantLock();
+
+
+    public void disablealllocks(){
+        this.globallock =  new FakeReentrantLock();
+        table_content.forEach(e -> {
+            e.disableLock();
+        });
+    }
 
     public InternalFormat(Config config, List<TableSchema> table_schema, List<TableContent> table_content) {
         this.config = config;

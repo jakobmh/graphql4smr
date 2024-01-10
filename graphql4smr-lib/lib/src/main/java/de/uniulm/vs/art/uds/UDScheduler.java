@@ -83,7 +83,7 @@ public class UDScheduler {
      * A freely modifiable copy of UDS config, which is used for changing the actual UDS config during
      * reconfigurigation (inbetween rounds) by copying its contents.
      */
-    private final UDSConfiguration requestedUDSConfiguration = new UDSConfiguration(1);
+    private final UDSConfiguration requestedUDSConfiguration = new UDSConfiguration(1,1000);
 
     /**
      * Thread pool for request scheduling
@@ -109,10 +109,19 @@ public class UDScheduler {
     private static final Logger logger = Logger.getLogger(UDScheduler.class.getName());
     private boolean closeudsscheulder = false;
 
-    /**
-     * Singleton. Not instantiable.
-     */
+
+    private ReentrantLock blockTerminateLock = new ReentrantLock();
+
+    private Condition blockTerminateCondition = blockTerminateLock.newCondition();
+
     public UDScheduler(int n) {
+        this(n,1000);
+    }
+
+        /**
+         * Singleton. Not instantiable.
+         */
+    public UDScheduler(int n, int stepsPerPrimary) {
         //logger.setLevel(ClientWorker.GLOBAL_LOGGING_LEVEL);
 
         this.threads = new LinkedList<>();
@@ -133,7 +142,7 @@ public class UDScheduler {
         newTotalOrder.add(0);
         this.requestedUDSConfiguration.setTotalOrder(newTotalOrder);
 
-        udsConfiguration = new UDSConfiguration(n);
+        udsConfiguration = new UDSConfiguration(n,stepsPerPrimary);
     }
 
 
@@ -414,8 +423,16 @@ public class UDScheduler {
 
             // ... and now start a new round
             //System.out.println("round" + round);
-            if(!(closeudsscheulder && numberOfThreadsScheduledtotal == numberOfThreadsTerminated))
-            startRound();
+            if(!(closeudsscheulder && numberOfThreadsScheduledtotal == numberOfThreadsTerminated)){
+                startRound();
+            }else{
+                blockTerminateLock.lock();
+                try{
+                    blockTerminateCondition.signalAll();
+                }finally {
+                    blockTerminateLock.unlock();
+                }
+            }
 
         } finally {
             schedulerLock.unlock();
@@ -663,7 +680,7 @@ public class UDScheduler {
      *
      * @param primaries       The number of primaries that should be used in all following rounds that are started
      * @param stepsPerPrimary The number of steps each primary receives in all following rounds
-     */
+     * /
     public int requestReconfiguration(int primaries, int stepsPerPrimary) {
         schedulerLock.lock();
         // TODO implement different total orders (all at once, random, etc)
@@ -697,12 +714,14 @@ public class UDScheduler {
         return this.requestedUDSConfiguration.getN();
     }
 
+
+
     /**
      * Reconfigure only the primaries, while keeping the steps from the previous configuration.
      * See
      * @param primaries
      * @return
-     */
+     * /
     public int requestReconfigurationPrimaries(int primaries) {
         // get the current number of steps (implicitly encoded in the length of the total order)
         int currentSteps = requestedUDSConfiguration.getTotalOrder().size() / requestedUDSConfiguration.getN();
@@ -710,12 +729,14 @@ public class UDScheduler {
         return requestReconfiguration(primaries, currentSteps);
     }
 
+
     public void requestReconfigurationSteps(int steps) {
         // get the current number of primaries
         int currentPrimaries = requestedUDSConfiguration.getN();
         // request the new configuration
         requestReconfiguration(currentPrimaries, steps);
     }
+     */
 
     /**
      * Create log string with total order
@@ -775,10 +796,10 @@ public class UDScheduler {
         /**
          * Create a basic configuration with 1 primary and 1 step
          */
-        private UDSConfiguration(int n) {
+        private UDSConfiguration(int n, int stepsPerPrimary) {
             this.n = n;
             this.totalOrder = new ArrayList<>(n);
-            int stepsPerPrimary = 10000;
+            //int stepsPerPrimary = 10000;
             List<Integer> newTotalOrder = new ArrayList<>(n * stepsPerPrimary + 1);
             for(int i = 0; i < stepsPerPrimary; i++) {
                 for(int j = 0; j < n; j++) {
@@ -1099,18 +1120,24 @@ public class UDScheduler {
         closeudsscheulder = true;
         long numberOfThreadsTerminated_temp = numberOfThreadsTerminated;
         while(numberOfThreadsScheduledtotal != numberOfThreadsTerminated){
-            try {
-                if(numberOfThreadsTerminated_temp != numberOfThreadsTerminated){
-                    System.out.println("completion" + numberOfThreadsTerminated + "/" + numberOfThreadsScheduledtotal);
-                    numberOfThreadsTerminated_temp = numberOfThreadsTerminated;
-                }
-
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            if(numberOfThreadsTerminated_temp != numberOfThreadsTerminated){
+                System.out.println("completion" + numberOfThreadsTerminated + "/" + numberOfThreadsScheduledtotal);
+                numberOfThreadsTerminated_temp = numberOfThreadsTerminated;
+            }
+            blockTerminateLock.lock();
+            try{
+                blockTerminateCondition.await();
+            }catch(Exception e){
+                e.printStackTrace();
+            }finally{
+                blockTerminateLock.unlock();
             }
         }
 
+
+        // TODO terminate Threadpool more greacefully
+        // these lines terminate the udsThreadspool
+        // If these Lines not included you will have Deamonthreads
         udsThreadPool.shutdown();
         try {
             if (!udsThreadPool.awaitTermination(60, TimeUnit.SECONDS)) {
@@ -1120,5 +1147,7 @@ public class UDScheduler {
             udsThreadPool.shutdownNow();
             Thread.currentThread().interrupt();
         }
+
+
     }
 }

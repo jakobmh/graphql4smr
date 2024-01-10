@@ -103,7 +103,9 @@ public class GnuplotExample {
 
         return "set terminal png size 1024,768\n" +
                 "set output \"{0}\"\n" +
-                "set title \"{1}\"\n" +
+                //"set title \"{1}\"\n" +
+                "set xlabel \"GraphQL Anfragetiefe\"\n" +
+                "set ylabel \"Durchschnittliche Antwortzeit in ms\"\n" +
                 "set key right bottom\n" +
                 "plot "+
                 IntStream.range(1, amount+1).asLongStream().mapToObj(e-> String.format("\"{%s}\" with linespoints title \"{%s}\"", e *2 ,e *2+1)).collect(Collectors.joining(","));

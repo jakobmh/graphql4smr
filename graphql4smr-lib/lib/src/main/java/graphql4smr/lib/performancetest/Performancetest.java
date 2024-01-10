@@ -4,6 +4,7 @@ import de.uniulm.vs.art.uds.UDSLock;
 import de.uniulm.vs.art.uds.UDScheduler;
 import graphql.parser.ParserOptions;
 import graphql4smr.lib.GraphQL4SMRStringWrapper;
+import graphql4smr.lib.SleepUtil;
 import graphql4smr.lib.schemawithdata.CRUDDofInternalFormat;
 import graphql4smr.lib.schemawithdata.ErdosRenyiSchema;
 import graphql4smr.lib.schemawithdata.GraphQLSchemaDumper;
@@ -18,13 +19,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Performancetest {
 
-
     private UDScheduler uds = null;
     private int N = 20;
     private int n = 0;
     private int recursiondepth;
 
-    private static final int recursiondepthmax = 7;
+    private static final int recursiondepthmax = 9;
     private InternalFormat internalFormat;
     private CRUDDofInternalFormat crudDofInternalFormat;
 
@@ -54,12 +54,15 @@ public class Performancetest {
         //System.out.println(crudDofInternalFormat.request("{select_node0(id:\"100\") {id,node3}}"));
         //System.out.println(crudDofInternalFormat.request("{read_node0 {id,node3{id}}}"));
         */
+        boolean disableLocks = false;
 
         Performancetest performancetest = new Performancetest();
         performancetest.setup();
-        System.out.println(performancetest.test());
+        if(disableLocks) performancetest.internalFormat.disablealllocks();
 
-        System.out.println(performancetest.testmultithreaded());
+        System.out.println(performancetest.test(disableLocks));
+
+        System.out.println(performancetest.testmultithreaded(disableLocks));
 
     }
 
@@ -94,10 +97,12 @@ public class Performancetest {
 
     }
 
-    public static String test(){
+    public static String test(boolean disableLocks){
+
         Performancetest performancetest = new Performancetest();
         performancetest.N = 20;
         performancetest.setup();
+        if(disableLocks) performancetest.internalFormat.disablealllocks();
         StringBuilder builder = new StringBuilder();
         for(int i=0; i<recursiondepthmax;i++){
             performancetest.recursiondepth = i;
@@ -135,10 +140,11 @@ public class Performancetest {
         System.out.println(requestbody);
     }
 
-    public static String testmultithreaded(){
+    public static String testmultithreaded(boolean disableLocks){
         Performancetest performancetest = new Performancetest();
         performancetest.N = 20;
         performancetest.setup();
+        if(disableLocks) performancetest.internalFormat.disablealllocks();
         performancetest.crudDofInternalFormat.cachegetGraphQLObjectType();
         performancetest.crudDofInternalFormat.cacheGraphQL();
 
@@ -190,7 +196,7 @@ public class Performancetest {
     }
 
 
-    public static String testmultithreadeduds(){
+    public static String testmultithreadeduds(boolean disableLocks){
         int counter = recursiondepthmax;
 
         StringBuilder builder = new StringBuilder();
@@ -201,6 +207,7 @@ public class Performancetest {
             Performancetest performancetest = new Performancetest(uds);
             performancetest.N = 20;
             performancetest.setup();
+            if(disableLocks) performancetest.internalFormat.disablealllocks();
 
             String exampleReadRequest2 = performancetest.crudDofInternalFormat.exampleReadRequestRecursion(i);
             builder.append(i + " " + performancetest.runtestmultithreaduds(exampleReadRequest2,10)/10 + "\n");

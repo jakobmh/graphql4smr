@@ -1,5 +1,6 @@
 package graphql4smr.lib.schemawithdata;
 
+import graphql4smr.lib.util.FakeReentrantLock;
 import graphql4smr.lib.util.LockBuilder;
 
 import java.util.List;
@@ -20,6 +21,10 @@ public class TableContent {
     public TableContent(String table, List<ColumnEntry> table_values) {
         this.table = table;
         this.table_values = table_values;
+    }
+
+    public void disableLock(){
+        tablelock = new FakeReentrantLock();
     }
 
     public TableContent(LockBuilder lockBuilder){

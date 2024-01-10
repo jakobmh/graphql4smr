@@ -28,13 +28,14 @@ public class App {
 
     private static String helpstr =
             "plot1\n" +
+            "plot2\n" +
             "example4\n" +
             "performancetest (TODO)\n" +
             "gnuplotexample\n" +
             "counterexample\n" +
             "erdosrenyischema\n" +
             "plottergui\n" +
-            "-help";
+            "--help";
 
     public static void main(String[] args) throws IOException {
 
@@ -52,6 +53,11 @@ public class App {
                 createPlotsdirifnotexist();
                 File outputfile = new File("plots/plot1.jpg");
                 ImageIO.write(PlotterGui.createplot1(), "jpg", outputfile);
+                break;
+            case "plot2":
+                createPlotsdirifnotexist();
+                File outputfile2 = new File("plots/plot2.jpg");
+                ImageIO.write(PlotterGui.createplot2(), "jpg", outputfile2);
                 break;
             case "example4":
                 InternalFormat internalFormat = SqliteUtil.from(ResourceHolder.singleton.example4);
@@ -76,7 +82,7 @@ public class App {
             case "plottergui":
                 new PlotterGui();
                 break;
-            case "-help":
+            case "--help":
                 System.out.println(helpstr);
                 break;
             default:

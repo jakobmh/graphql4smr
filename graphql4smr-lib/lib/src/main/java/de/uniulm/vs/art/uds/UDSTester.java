@@ -35,8 +35,8 @@ public class UDSTester {
 
     public Double runTest() {
         //logger.setLevel(ClientWorker.GLOBAL_LOGGING_LEVEL);
-        UDScheduler uds = new UDScheduler(1);
-
+        UDScheduler uds = new UDScheduler(udsPrimaries,udsSteps);
+        /*
         Callable<Double> testDoneRunnable = () -> {
             long start = System.currentTimeMillis();
             if(withUDS) {
@@ -75,8 +75,14 @@ public class UDSTester {
             e.printStackTrace();
         }
 
+         */
+        long start = System.currentTimeMillis();
+
+
+
+
         if(withUDS) {
-            UDSLock udsLock  = new UDSLock(uds,1);
+            UDSLock udsLock  = new UDSLock(uds,10);
             Runnable lu250LURunnableUDS = () -> {
                 // lock and unlock the UDSLock
                 udsLock.lock();
@@ -89,8 +95,7 @@ public class UDSTester {
             };
 
             // reconfigure UDS
-            uds.addRequest(() -> uds.requestReconfiguration(udsPrimaries,
-                    udsSteps), () -> {});
+            //uds.addRequest(() -> uds.requestReconfiguration(udsPrimaries,udsSteps), () -> {});
 
             // create and run threads with UDS
             logger.warning("Tester {" + Thread.currentThread().getName() + "}: " +
@@ -121,12 +126,19 @@ public class UDSTester {
             }
         }
 
+        /*
         double throughput = -1d;
         try {
             throughput = throughputFuture.get();
         } catch(InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+         */
+        uds.blockTerminate();
+
+
+        double duration = (double) System.currentTimeMillis() - start;
+        double throughput = (double) numberOfThreadsToCreate / (duration / 1000);
         return throughput;
     }
 

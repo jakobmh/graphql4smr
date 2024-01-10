@@ -23,7 +23,7 @@ java -jar app/build/libs/app.jar --help
 ## execute example4
 
 ```
-java -jar app/build/libs/app.jar --help
+java -jar app/build/libs/app.jar example4
 ```
 
 open webbrowser on http://localhost:5555/
@@ -32,4 +32,8 @@ open webbrowser on http://localhost:5555/
 execute gnuplotexample
 ```
 java -jar app/build/libs/app.jar plot1
+```
+
+```
+java -jar app/build/libs/app.jar plot2
 ```
